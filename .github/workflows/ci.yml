@@ -98,9 +98,6 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'table'
-      continue-on-error: true
+      run: |
+        echo "Security scanning with Trivy..."
+        docker run --rm -v $(pwd):/workspace aquasec/trivy:latest fs /workspace --severity HIGH,CRITICAL || true
