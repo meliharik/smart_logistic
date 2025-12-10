@@ -49,21 +49,38 @@ Controller → Service → Repository → Database
 
 ## ⚡ Quick Start
 
-### 1. Start PostgreSQL
+### 1. Verify Prerequisites
 
 ```bash
-docker-compose up -d
+# Check Java version (must be 17+)
+java -version
+
+# Check Maven
+mvn -version
+
+# Check Docker
+docker --version
 ```
 
-### 2. Verify Database
+### 2. Start PostgreSQL
 
 ```bash
+# Start PostgreSQL (creates database and user automatically)
+docker-compose up -d
+
+# Wait for PostgreSQL to be ready (10-15 seconds)
+sleep 15
+
+# Verify database connection
 docker exec logiroute-postgres psql -U logiroute -d logiroute -c "SELECT current_database();"
 ```
 
-### 3. Run Tests (Verify Everything Works)
+**Expected Output:** `logiroute`
+
+### 3. Run Tests (Verify Code Works)
 
 ```bash
+# Run all tests
 mvn test
 ```
 
@@ -76,14 +93,30 @@ Tests run: 12, Failures: 0, Errors: 0, Skipped: 0
 ### 4. Run the Application
 
 ```bash
+# Start application (will take 30-40 seconds first time)
 mvn spring-boot:run
+```
+
+**Wait for this message:**
+```
+Started LogiRouteApplication in X.XXX seconds
 ```
 
 **Application starts on:** `http://localhost:8080`
 
-**Seed Data Loaded:**
+**Seed Data Automatically Loaded:**
 - 2 vehicles: ABC-1234 (1000kg), XYZ-5678 (1500kg)
 - 5 packages with various weights and deadlines
+
+### 5. Test the API (Open a New Terminal)
+
+```bash
+# Get all vehicles
+curl http://localhost:8080/api/vehicles
+
+# Get all packages
+curl http://localhost:8080/api/packages
+```
 
 ## 🧪 Testing the Business Logic
 
@@ -364,43 +397,80 @@ The `DataLoader` creates the following test scenarios:
 
 ## ❓ Troubleshooting
 
-### Application Won't Start
+### 1. Application Won't Start - "role logiroute does not exist"
 
+**Problem:** PostgreSQL didn't create the user properly.
+
+**Solution:**
 ```bash
-# 1. Check if PostgreSQL is running
-docker ps | grep logiroute-postgres
-
-# 2. Restart PostgreSQL
+# 1. Stop everything
 docker-compose down -v
+
+# 2. Start PostgreSQL fresh
 docker-compose up -d
 
-# 3. Verify database connection
-docker exec logiroute-postgres psql -U logiroute -d logiroute -c "SELECT 1;"
+# 3. Wait for initialization
+sleep 15
 
-# 4. Check if port 8080 is in use
-lsof -i :8080
+# 4. Verify user exists
+docker exec logiroute-postgres psql -U logiroute -d logiroute -c "SELECT current_user;"
 
-# 5. Run tests to verify everything works
-mvn test
+# 5. If above works, start application
+mvn spring-boot:run
 ```
 
-### Tests Failing
+### 2. Port 8080 Already in Use
 
 ```bash
-# Clean build and recompile
+# Find process using port 8080
+lsof -i :8080
+
+# Kill the process (replace PID with actual number)
+kill -9 <PID>
+
+# Or kill all Java processes
+pkill -9 java
+```
+
+### 3. Tests Failing
+
+```bash
+# Clean everything and rebuild
 mvn clean compile
 
-# Run tests with verbose output
+# Run tests
+mvn test
+
+# If still failing, check output
 mvn test -X
 ```
 
-### Database Connection Error
+### 4. PostgreSQL Won't Start
 
 ```bash
-# Reset database completely
+# Check Docker is running
+docker ps
+
+# View PostgreSQL logs
+docker logs logiroute-postgres
+
+# Restart Docker Desktop and try again
 docker-compose down -v
 docker-compose up -d
-sleep 5
+```
+
+### 5. Complete Reset (Nuclear Option)
+
+```bash
+# Stop and remove everything
+docker-compose down -v
+pkill -9 java
+mvn clean
+
+# Start fresh
+docker-compose up -d
+sleep 15
+mvn test
 mvn spring-boot:run
 ```
 
