@@ -7,9 +7,13 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)
 
+[![CI/CD Pipeline](https://github.com/meliharik/smart_logistic/actions/workflows/ci.yml/badge.svg)](https://github.com/meliharik/smart_logistic/actions/workflows/ci.yml)
+[![Docker Build](https://github.com/meliharik/smart_logistic/actions/workflows/docker-build.yml/badge.svg)](https://github.com/meliharik/smart_logistic/actions/workflows/docker-build.yml)
+[![Deploy to GitHub Pages](https://github.com/meliharik/smart_logistic/actions/workflows/deploy.yml/badge.svg)](https://github.com/meliharik/smart_logistic/actions/workflows/deploy.yml)
+
 **Enterprise-grade logistics management system with intelligent package routing, capacity optimization, and state machine validation.**
 
-[Live Demo](https://yourusername.github.io/smart-logistic/) •
+[Live Demo](https://meliharik.github.io/smart_logistic/) •
 [Features](#-features) •
 [Quick Start](#-quick-start) •
 [API Docs](#-api-documentation) •
