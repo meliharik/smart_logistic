@@ -34,6 +34,7 @@
 - [API Documentation](#-api-documentation)
 - [Project Structure](#-project-structure)
 - [Testing](#-testing)
+- [GitHub Pages Setup](#-github-pages-setup)
 - [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -109,7 +110,6 @@ List<Package> sortedPackages = packages.stream()
 ### Web UI
 Access the modern web interface at **http://localhost:8080** after starting the application.
 
-![LogiRoute Dashboard](https://via.placeholder.com/800x400/667eea/ffffff?text=LogiRoute+Dashboard)
 
 ### API Examples
 
@@ -398,6 +398,37 @@ mvn test -Dtest=DeliveryServiceTest
 - Resource not found handling
 - Route completion
 - Package state validation
+
+---
+
+## 🌐 GitHub Pages Setup
+
+To enable GitHub Pages for this project:
+
+1. Go to your repository on GitHub
+2. Navigate to **Settings** → **Pages**
+3. Under **Source**, select **"GitHub Actions"** (not "Deploy from a branch")
+4. Click **Save**
+
+The deployment will automatically trigger when you push changes to the `docs/` directory. The site will be available at:
+
+```
+https://meliharik.github.io/smart_logistic/
+```
+
+### Manual Deployment
+
+You can also trigger the deployment manually:
+
+1. Go to the **Actions** tab in your repository
+2. Select the **Deploy to GitHub Pages** workflow
+3. Click **Run workflow** → **Run workflow**
+
+### Workflow Status
+
+- [![Deploy to GitHub Pages](https://github.com/meliharik/smart_logistic/actions/workflows/deploy.yml/badge.svg)](https://github.com/meliharik/smart_logistic/actions/workflows/deploy.yml)
+
+**Note:** If the badge shows "failing", it means GitHub Pages hasn't been enabled yet in repository settings. Follow the steps above to enable it.
 
 ---
 
