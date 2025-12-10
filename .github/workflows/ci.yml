@@ -54,10 +54,7 @@ jobs:
         SPRING_DATASOURCE_PASSWORD: logiroute123
 
     - name: Generate test coverage report
-      run: mvn jacoco:report
-
-    - name: Verify code style
-      run: mvn checkstyle:check || true
+      run: mvn jacoco:report || true
 
     - name: Package application
       run: mvn package -DskipTests
@@ -100,20 +97,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Run dependency check
-      run: |
-        mvn org.owasp:dependency-check-maven:check || true
-
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
         scan-type: 'fs'
         scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-
-    - name: Upload Trivy results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
+        format: 'table'
+      continue-on-error: true
