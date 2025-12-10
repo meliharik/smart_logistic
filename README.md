@@ -1,82 +1,53 @@
 # LogiRoute - Logistics Optimization System
 
-A Spring Boot 3 logistics optimization system that implements intelligent package routing with capacity management and state machine validation.
+Enterprise-grade Spring Boot 3 logistics optimization system with intelligent package routing, capacity management, and state machine validation.
 
-## Features
+## 🚀 Key Features
 
-### Core Business Logic
+### 1. **Capacity Guard** - Vehicle Overload Prevention
+Validates vehicle capacity before package assignment:
+- Checks: `totalWeight + currentLoad <= capacity`
+- Throws `VehicleOverloadedException` when exceeded
+- **Implementation:** `DeliveryService.java:47-56`
 
-1. **Capacity Guard**: Validates vehicle capacity before package assignment
-   - Prevents overloading by checking: `package.weight + vehicle.currentLoad <= vehicle.capacity`
-   - Throws `VehicleOverloadedException` when capacity is exceeded
+### 2. **State Machine** - Package Status Validation
+Enforces valid package status transitions:
+- Valid flow: `CREATED → LOADED → DELIVERED`
+- Prevents invalid transitions
+- **Implementation:** `Package.java:55-65`
 
-2. **State Machine**: Enforces valid package status transitions
-   - Valid flow: `CREATED -> LOADED -> DELIVERED`
-   - Prevents illegal transitions (e.g., CREATED -> DELIVERED directly)
-   - Throws `InvalidStatusTransitionException` for invalid transitions
+### 3. **Smart Routing** - Deadline-Based Optimization
+Automatically sorts packages by delivery deadline:
+- Earliest deadline first
+- Optimizes delivery efficiency
+- **Implementation:** `DeliveryService.java:58-61`
 
-3. **Smart Routing**: Automatically sorts packages by delivery deadline
-   - Packages with earliest deadlines are prioritized first
-   - Optimizes delivery efficiency
-
-## Tech Stack
+## 📋 Tech Stack
 
 - **Java 17+**
 - **Spring Boot 3.2.1**
-- **Spring Data JPA** with PostgreSQL
-- **Lombok** for boilerplate reduction
-- **MapStruct** for DTO mapping
+- **Spring Data JPA** + PostgreSQL 16
+- **Lombok** + **MapStruct**
 - **Jakarta Validation**
-- **Docker & Docker Compose**
-- **JUnit 5 & Mockito** for testing
+- **Docker Compose**
+- **JUnit 5** + **Mockito**
 
-## Project Structure
+## 🏗️ Architecture
 
 ```
-src/main/java/com/logistics/logiroute/
-├── config/
-│   └── DataLoader.java                 # Seed data loader
-├── controller/
-│   ├── DeliveryController.java         # Delivery & route management
-│   ├── PackageController.java          # Package CRUD
-│   └── VehicleController.java          # Vehicle CRUD
-├── domain/
-│   ├── entity/
-│   │   ├── DeliveryRoute.java          # Route entity
-│   │   ├── Package.java                # Package entity
-│   │   └── Vehicle.java                # Vehicle entity
-│   └── enums/
-│       ├── PackageStatus.java          # Package states
-│       └── VehicleStatus.java          # Vehicle states
-├── dto/
-│   ├── request/
-│   │   ├── AssignPackagesRequest.java
-│   │   └── UpdatePackageStatusRequest.java
-│   ├── response/
-│   │   └── ErrorResponse.java
-│   ├── DeliveryRouteDto.java
-│   ├── PackageDto.java
-│   └── VehicleDto.java
-├── exception/
-│   ├── GlobalExceptionHandler.java     # Centralized exception handling
-│   ├── InvalidStatusTransitionException.java
-│   ├── ResourceNotFoundException.java
-│   └── VehicleOverloadedException.java
-├── mapper/
-│   ├── DeliveryRouteMapper.java        # MapStruct mapper
-│   ├── PackageMapper.java
-│   └── VehicleMapper.java
-├── repository/
-│   ├── DeliveryRouteRepository.java
-│   ├── PackageRepository.java
-│   └── VehicleRepository.java
-└── service/
-    ├── DeliveryService.java            # Core business logic
-    ├── PackageService.java
-    └── VehicleService.java
+Controller → Service → Repository → Database
+    ↓          ↓          ↓
+   DTO    Business     JPA
+          Logic     Entities
 ```
 
-## Quick Start
+**Layers:**
+- **Controller:** REST API endpoints
+- **Service:** Business logic (Capacity Guard, State Machine, Routing)
+- **Repository:** Data access with Spring Data JPA
+- **Entity:** Domain models with business methods
+
+## ⚡ Quick Start
 
 ### 1. Start PostgreSQL
 
@@ -84,45 +55,42 @@ src/main/java/com/logistics/logiroute/
 docker-compose up -d
 ```
 
-### 2. Build the Project
+### 2. Verify Database
 
 ```bash
-mvn clean install
+docker exec logiroute-postgres psql -U logiroute -d logiroute -c "SELECT current_database();"
 ```
 
-### 3. Run the Application
-
-```bash
-mvn spring-boot:run
-```
-
-The application will start on `http://localhost:8080` and automatically seed the database with:
-- **2 vehicles**: ABC-1234 (1000kg), XYZ-5678 (1500kg)
-- **5 packages**: Various weights and delivery deadlines
-
-### 4. Run Tests
+### 3. Run Tests (Verify Everything Works)
 
 ```bash
 mvn test
 ```
 
-## API Examples
-
-### View All Vehicles
-
-```bash
-curl http://localhost:8080/api/vehicles
+**Expected Output:**
+```
+Tests run: 12, Failures: 0, Errors: 0, Skipped: 0
+✅ BUILD SUCCESS
 ```
 
-### View All Packages
+### 4. Run the Application
 
 ```bash
-curl http://localhost:8080/api/packages
+mvn spring-boot:run
 ```
 
-### Assign Packages to Vehicle (Capacity Guard Test)
+**Application starts on:** `http://localhost:8080`
 
-**Scenario 1: Success - Within capacity**
+**Seed Data Loaded:**
+- 2 vehicles: ABC-1234 (1000kg), XYZ-5678 (1500kg)
+- 5 packages with various weights and deadlines
+
+## 🧪 Testing the Business Logic
+
+### Test 1: Capacity Guard (SUCCESS)
+
+Assign packages within capacity:
+
 ```bash
 curl -X POST http://localhost:8080/api/delivery/assign \
   -H "Content-Type: application/json" \
@@ -131,116 +99,173 @@ curl -X POST http://localhost:8080/api/delivery/assign \
     "packageIds": [4, 2, 5]
   }'
 ```
-Response: Packages sorted by deadline (4→2→5), total 950kg < 1000kg ✓
 
-**Scenario 2: Failure - Exceeds capacity**
+**Expected:** 200 OK, packages sorted by deadline
+
+### Test 2: Capacity Guard (FAILURE)
+
+Try to exceed vehicle capacity:
+
 ```bash
 curl -X POST http://localhost:8080/api/delivery/assign \
   -H "Content-Type: application/json" \
   -d '{
     "vehicleId": 1,
-    "packageIds": [1, 2, 3]
+    "packageIds": [1, 3]
   }'
 ```
-Response: VehicleOverloadedException (total 650kg > 1000kg) ✗
 
-### Update Package Status (State Machine Test)
-
-**Valid transition: CREATED → LOADED**
-```bash
-curl -X PATCH http://localhost:8080/api/packages/1/status \
-  -H "Content-Type: application/json" \
-  -d '{"status": "LOADED"}'
+**Expected:** 400 Bad Request
+```json
+{
+  "status": 400,
+  "error": "Vehicle Overload",
+  "message": "Vehicle 'ABC-1234' cannot load ..."
+}
 ```
-Response: Success ✓
 
-**Invalid transition: CREATED → DELIVERED**
+### Test 3: State Machine (INVALID TRANSITION)
+
+Try invalid status transition (CREATED → DELIVERED):
+
 ```bash
 curl -X PATCH http://localhost:8080/api/packages/1/status \
   -H "Content-Type: application/json" \
   -d '{"status": "DELIVERED"}'
 ```
-Response: InvalidStatusTransitionException ✗
 
-### View Active Routes
-
-```bash
-curl http://localhost:8080/api/delivery/routes
+**Expected:** 400 Bad Request
+```json
+{
+  "status": 400,
+  "error": "Invalid Status Transition",
+  "message": "Package ID 1 cannot transition from CREATED to DELIVERED"
+}
 ```
 
-### Complete a Route
+### Test 4: State Machine (VALID TRANSITION)
+
+Valid transition (CREATED → LOADED):
 
 ```bash
-curl -X PATCH http://localhost:8080/api/delivery/routes/1/complete
+curl -X PATCH http://localhost:8080/api/packages/1/status \
+  -H "Content-Type: application/json" \
+  -d '{"status": "LOADED"}'
 ```
 
-## Testing Scenarios (from Seed Data)
+**Expected:** 200 OK
 
-The DataLoader creates test scenarios demonstrating the business logic:
+## 📚 API Endpoints
 
-1. **Capacity Guard - Success**
-   - Assign packages 4, 2, 5 to vehicle ABC-1234
-   - Total: 950kg < 1000kg capacity
-   - Result: Success with smart routing (sorted by deadline)
+### Vehicles
+- `GET /api/vehicles` - List all vehicles
+- `GET /api/vehicles/{id}` - Get vehicle by ID
+- `GET /api/vehicles/available` - Get available vehicles
+- `POST /api/vehicles` - Create vehicle
+- `PUT /api/vehicles/{id}` - Update vehicle
+- `DELETE /api/vehicles/{id}` - Delete vehicle
 
-2. **Capacity Guard - Failure**
-   - Try to assign package 3 (300kg) to ABC-1234 after above
-   - Remaining capacity: 50kg < 300kg
-   - Result: VehicleOverloadedException
+### Packages
+- `GET /api/packages` - List all packages
+- `GET /api/packages/{id}` - Get package by ID
+- `GET /api/packages/unassigned` - Get unassigned packages
+- `GET /api/packages/status/{status}` - Get by status (CREATED, LOADED, DELIVERED)
+- `POST /api/packages` - Create package
+- `PUT /api/packages/{id}` - Update package
+- `PATCH /api/packages/{id}/status` - Update status (validates state machine)
+- `DELETE /api/packages/{id}` - Delete package
 
-3. **Smart Routing**
-   - Assign packages 1, 3 to vehicle XYZ-5678
-   - Packages sorted: earliest deadline first
-   - Result: Optimized delivery route
+### Delivery Operations
+- `POST /api/delivery/assign` - Assign packages to vehicle (capacity guard)
+- `GET /api/delivery/routes` - Get active routes
+- `GET /api/delivery/routes/{id}` - Get route by ID
+- `GET /api/delivery/routes/vehicle/{vehicleId}` - Get routes by vehicle
+- `PATCH /api/delivery/routes/{id}/complete` - Complete route
 
-## Key Implementation Details
+## 🧪 Unit Tests
 
-### DeliveryService.java
+**12 comprehensive tests covering:**
 
-**Capacity Guard Logic** (src/main/java/com/logistics/logiroute/service/DeliveryService.java:47-56)
+✅ **Capacity Guard Tests:**
+- Successful assignment within capacity
+- Single package exceeds capacity
+- Multiple packages exceed capacity
+
+✅ **State Machine Tests:**
+- Valid transitions (CREATED→LOADED, LOADED→DELIVERED)
+- Invalid transitions prevented (CREATED→DELIVERED)
+- Backward transitions prevented
+- No transitions from DELIVERED state
+
+✅ **Smart Routing Tests:**
+- Packages sorted by earliest deadline
+
+✅ **Additional Tests:**
+- Resource not found handling
+- Route completion
+- Package state validation
+
+**Run tests:**
+```bash
+mvn test
+```
+
+## 📂 Project Structure
+
+```
+src/main/java/com/logistics/logiroute/
+├── config/
+│   └── DataLoader.java              # Seed data
+├── controller/
+│   ├── DeliveryController.java      # Delivery operations
+│   ├── PackageController.java       # Package CRUD
+│   └── VehicleController.java       # Vehicle CRUD
+├── domain/
+│   ├── entity/
+│   │   ├── DeliveryRoute.java       # Route entity
+│   │   ├── Package.java             # Package entity (State Machine logic)
+│   │   └── Vehicle.java             # Vehicle entity (Capacity logic)
+│   └── enums/
+│       ├── PackageStatus.java       # CREATED, LOADED, DELIVERED
+│       └── VehicleStatus.java       # AVAILABLE, IN_TRANSIT
+├── dto/                             # Data Transfer Objects
+├── exception/
+│   ├── GlobalExceptionHandler.java  # Centralized error handling
+│   ├── VehicleOverloadedException.java
+│   ├── InvalidStatusTransitionException.java
+│   └── ResourceNotFoundException.java
+├── mapper/                          # MapStruct mappers
+├── repository/                      # Spring Data JPA
+└── service/
+    ├── DeliveryService.java         # Core business logic
+    ├── PackageService.java
+    └── VehicleService.java
+```
+
+## 💡 Key Implementation Details
+
+### Capacity Guard Logic
 ```java
+// src/main/java/com/logistics/logiroute/service/DeliveryService.java:47-56
 double totalPackageWeight = packages.stream()
-        .mapToDouble(Package::getWeightKg)
-        .sum();
+    .mapToDouble(Package::getWeightKg)
+    .sum();
 
 if (!vehicle.canLoad(totalPackageWeight)) {
     throw VehicleOverloadedException.forPackage(
-            vehicle.getLicensePlate(),
-            totalPackageWeight,
-            vehicle.getRemainingCapacityKg()
+        vehicle.getLicensePlate(),
+        totalPackageWeight,
+        vehicle.getRemainingCapacityKg()
     );
 }
 ```
 
-**Smart Routing** (src/main/java/com/logistics/logiroute/service/DeliveryService.java:58-61)
+### State Machine Validation
 ```java
-List<Package> sortedPackages = packages.stream()
-        .sorted(Comparator.comparing(Package::getDeliveryDeadline))
-        .toList();
-```
-
-**State Machine Validation** (src/main/java/com/logistics/logiroute/service/DeliveryService.java:114-123)
-```java
-private void updatePackageStatus(Package pkg, PackageStatus newStatus) {
-    if (!pkg.canTransitionTo(newStatus)) {
-        throw InvalidStatusTransitionException.forPackage(
-                pkg.getId(),
-                pkg.getStatus(),
-                newStatus
-        );
-    }
-    pkg.setStatus(newStatus);
-}
-```
-
-### Package.java
-
-**State Transition Logic** (src/main/java/com/logistics/logiroute/domain/entity/Package.java:55-65)
-```java
+// src/main/java/com/logistics/logiroute/domain/entity/Package.java:55-65
 public boolean canTransitionTo(PackageStatus newStatus) {
-    if (this.status == newStatus) {
-        return true;
-    }
+    if (this.status == newStatus) return true;
+
     return switch (this.status) {
         case CREATED -> newStatus == PackageStatus.LOADED;
         case LOADED -> newStatus == PackageStatus.DELIVERED;
@@ -249,59 +274,17 @@ public boolean canTransitionTo(PackageStatus newStatus) {
 }
 ```
 
-## Unit Tests
-
-Comprehensive tests for DeliveryService cover:
-
-- ✓ Capacity guard: successful assignment within capacity
-- ✓ Capacity guard: exception when exceeding capacity
-- ✓ Capacity guard: multiple packages exceeding total capacity
-- ✓ Smart routing: packages sorted by deadline
-- ✓ State machine: valid transitions (CREATED→LOADED, LOADED→DELIVERED)
-- ✓ State machine: invalid transitions prevented
-- ✓ Route completion: vehicle status updates
-- ✓ Error handling: resource not found, illegal arguments
-
-Run tests: `mvn test`
-
-## Database Schema
-
-```sql
-vehicles
-├── id (PK)
-├── license_plate (unique)
-├── capacity_kg
-├── current_load_kg
-└── status (AVAILABLE | IN_TRANSIT)
-
-packages
-├── id (PK)
-├── delivery_address
-├── weight_kg
-├── status (CREATED | LOADED | DELIVERED)
-├── delivery_deadline
-└── delivery_route_id (FK)
-
-delivery_routes
-├── id (PK)
-├── vehicle_id (FK)
-├── created_at
-└── completed_at
+### Smart Routing Algorithm
+```java
+// src/main/java/com/logistics/logiroute/service/DeliveryService.java:58-61
+List<Package> sortedPackages = packages.stream()
+    .sorted(Comparator.comparing(Package::getDeliveryDeadline))
+    .toList();
 ```
 
-## Architecture Highlights
+## 🛠️ Configuration
 
-- **Clean Architecture**: Clear separation of concerns (Controller → Service → Repository)
-- **Domain-Driven Design**: Rich domain entities with business logic
-- **Exception Handling**: Centralized with GlobalExceptionHandler
-- **DTO Pattern**: Separation of API contracts from domain models
-- **MapStruct**: Type-safe, performant object mapping
-- **Validation**: Jakarta Bean Validation at API boundary
-- **Transaction Management**: @Transactional for data consistency
-
-## Configuration
-
-Database configuration in `application.yml`:
+**Database:** `src/main/resources/application.yml`
 ```yaml
 spring:
   datasource:
@@ -310,23 +293,134 @@ spring:
     password: logiroute123
 ```
 
-## Stopping the Application
+**Test Database:** `src/test/resources/application-test.yml`
+```yaml
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb  # In-memory H2 for tests
+```
+
+## 🐳 Docker Commands
 
 ```bash
-# Stop Spring Boot
-Ctrl+C
+# Start PostgreSQL
+docker-compose up -d
 
 # Stop PostgreSQL
 docker-compose down
+
+# Reset database (delete all data)
+docker-compose down -v
+
+# View PostgreSQL logs
+docker logs logiroute-postgres
+
+# Connect to PostgreSQL
+docker exec -it logiroute-postgres psql -U logiroute -d logiroute
 ```
 
-## Future Enhancements
+## 🔧 Maven Commands
 
-- Route optimization algorithms (TSP, genetic algorithms)
-- Real-time vehicle tracking
-- Multi-depot support
-- Time window constraints
-- Driver management
-- REST API documentation (Swagger/OpenAPI)
-- Integration tests
-- Performance monitoring
+```bash
+# Clean and compile
+mvn clean compile
+
+# Run tests
+mvn test
+
+# Run specific test class
+mvn test -Dtest=DeliveryServiceTest
+
+# Run application
+mvn spring-boot:run
+
+# Package as JAR
+mvn clean package
+
+# Skip tests during build
+mvn clean package -DskipTests
+```
+
+## 📊 Testing Scenarios (Pre-loaded Data)
+
+The `DataLoader` creates the following test scenarios:
+
+| Scenario | Details | Expected Result |
+|----------|---------|----------------|
+| **1. Success** | Assign packages [4,2,5] to ABC-1234<br>Total: 950kg < 1000kg | ✅ SUCCESS<br>Sorted by deadline |
+| **2. Failure** | Assign package 3 (300kg) to ABC-1234<br>Remaining: 50kg < 300kg | ❌ VehicleOverloadedException |
+| **3. Success** | Assign packages [1,3] to XYZ-5678<br>Total: 450kg < 1500kg | ✅ SUCCESS |
+
+## 🏆 Architecture Highlights
+
+- ✅ **Clean Architecture** - Layered design with clear separation
+- ✅ **Domain-Driven Design** - Rich domain models
+- ✅ **SOLID Principles** - Single responsibility, dependency inversion
+- ✅ **Exception Handling** - Global handler with proper HTTP status codes
+- ✅ **DTO Pattern** - API/domain separation with MapStruct
+- ✅ **Transaction Management** - @Transactional for ACID guarantees
+- ✅ **Validation** - Jakarta Bean Validation at API boundaries
+- ✅ **Testing** - Comprehensive unit tests with Mockito
+
+## ❓ Troubleshooting
+
+### Application Won't Start
+
+```bash
+# 1. Check if PostgreSQL is running
+docker ps | grep logiroute-postgres
+
+# 2. Restart PostgreSQL
+docker-compose down -v
+docker-compose up -d
+
+# 3. Verify database connection
+docker exec logiroute-postgres psql -U logiroute -d logiroute -c "SELECT 1;"
+
+# 4. Check if port 8080 is in use
+lsof -i :8080
+
+# 5. Run tests to verify everything works
+mvn test
+```
+
+### Tests Failing
+
+```bash
+# Clean build and recompile
+mvn clean compile
+
+# Run tests with verbose output
+mvn test -X
+```
+
+### Database Connection Error
+
+```bash
+# Reset database completely
+docker-compose down -v
+docker-compose up -d
+sleep 5
+mvn spring-boot:run
+```
+
+## 📈 Future Enhancements
+
+- [ ] Route optimization algorithms (TSP, genetic algorithms)
+- [ ] Real-time vehicle tracking with WebSockets
+- [ ] Multi-depot support
+- [ ] Time window constraints
+- [ ] Driver management module
+- [ ] REST API documentation (Swagger/OpenAPI)
+- [ ] Integration tests
+- [ ] Performance monitoring (Spring Boot Actuator + Micrometer)
+- [ ] Caching layer (Redis)
+- [ ] Event-driven architecture (Kafka/RabbitMQ)
+
+## 📄 License
+
+This is an educational project for demonstrating Spring Boot architecture and logistics optimization concepts.
+
+---
+
+**Built with ❤️ using Spring Boot 3, Clean Architecture, and Domain-Driven Design**
