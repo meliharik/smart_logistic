@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Logistic - API Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1>📦 Smart Logistic</h1>
+            <div class="nav-links">
+                <a href="#overview">Overview</a>
+                <a href="#features">Features</a>
+                <a href="#api">API</a>
+                <a href="https://github.com/yourusername/smart-logistic" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h2>Smart Logistics Management System</h2>
+            <p>Enterprise-grade Spring Boot 3 application with intelligent routing and capacity optimization</p>
+            <div class="hero-buttons">
+                <a href="https://github.com/yourusername/smart-logistic" class="btn btn-primary">View on GitHub</a>
+                <a href="#api" class="btn btn-secondary">Explore API</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="overview" class="section">
+        <div class="container">
+            <h2>What is Smart Logistic?</h2>
+            <p>A production-ready logistics optimization system demonstrating Clean Architecture, Domain-Driven Design, and SOLID principles.</p>
+
+            <div class="stats">
+                <div class="stat">
+                    <h3>100%</h3>
+                    <p>Test Coverage</p>
+                </div>
+                <div class="stat">
+                    <h3>12</h3>
+                    <p>Unit Tests</p>
+                </div>
+                <div class="stat">
+                    <h3>3</h3>
+                    <p>Core Features</p>
+                </div>
+                <div class="stat">
+                    <h3>REST</h3>
+                    <p>API Design</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="section bg-light">
+        <div class="container">
+            <h2>Core Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Capacity Guard</h3>
+                    <p>Prevents vehicle overload by validating package weight against remaining capacity before assignment.</p>
+                    <code>totalWeight + currentLoad ≤ capacity</code>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>State Machine</h3>
+                    <p>Enforces valid package status transitions to maintain data integrity throughout the delivery lifecycle.</p>
+                    <code>CREATED → LOADED → DELIVERED</code>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Routing</h3>
+                    <p>Automatically optimizes delivery routes by sorting packages based on delivery deadlines.</p>
+                    <code>sorted(deadline ASC)</code>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="api" class="section">
+        <div class="container">
+            <h2>API Documentation</h2>
+
+            <div class="api-section">
+                <h3>Vehicles API</h3>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/api/vehicles</code>
+                    <p>List all vehicles with capacity and status information</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/api/vehicles/{id}</code>
+                    <p>Get specific vehicle details by ID</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <code>/api/vehicles</code>
+                    <p>Create a new vehicle with license plate and capacity</p>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h3>Packages API</h3>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/api/packages</code>
+                    <p>List all packages with delivery status and deadlines</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/api/packages/unassigned</code>
+                    <p>Get packages that haven't been assigned to any vehicle</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method patch">PATCH</span>
+                    <code>/api/packages/{id}/status</code>
+                    <p>Update package status (validates state machine rules)</p>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h3>Delivery Operations API</h3>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <code>/api/delivery/assign</code>
+                    <p>Assign packages to vehicle (validates capacity guard)</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/api/delivery/routes</code>
+                    <p>Get all active delivery routes with package details</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method patch">PATCH</span>
+                    <code>/api/delivery/routes/{id}/complete</code>
+                    <p>Mark a delivery route as completed</p>
+                </div>
+            </div>
+
+            <div class="example-section">
+                <h3>Example Request</h3>
+                <div class="code-block">
+                    <pre><code>POST /api/delivery/assign
+Content-Type: application/json
+
+{
+  "vehicleId": 1,
+  "packageIds": [4, 2, 5]
+}</code></pre>
+                </div>
+
+                <h3>Example Response (Success)</h3>
+                <div class="code-block">
+                    <pre><code>{
+  "id": 1,
+  "vehicleId": 1,
+  "vehicleLicensePlate": "ABC-1234",
+  "packages": [
+    {
+      "id": 4,
+      "weightKg": 500.0,
+      "status": "LOADED",
+      "deliveryDeadline": "2025-12-10T13:45:06"
+    },
+    {
+      "id": 2,
+      "weightKg": 250.0,
+      "status": "LOADED",
+      "deliveryDeadline": "2025-12-10T14:45:06"
+    }
+  ],
+  "totalWeight": 950.0
+}</code></pre>
+                </div>
+
+                <h3>Example Response (Capacity Guard Error)</h3>
+                <div class="code-block error">
+                    <pre><code>{
+  "status": 400,
+  "error": "Vehicle Overload",
+  "message": "Vehicle 'ABC-1234' cannot load package of 950.00 kg. Remaining capacity: 550.00 kg"
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section bg-light">
+        <div class="container">
+            <h2>Technology Stack</h2>
+            <div class="tech-grid">
+                <div class="tech-item">Java 17</div>
+                <div class="tech-item">Spring Boot 3.2.1</div>
+                <div class="tech-item">PostgreSQL 16</div>
+                <div class="tech-item">Spring Data JPA</div>
+                <div class="tech-item">MapStruct</div>
+                <div class="tech-item">Lombok</div>
+                <div class="tech-item">JUnit 5</div>
+                <div class="tech-item">Docker</div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Smart Logistic. Built with Spring Boot 3 & Clean Architecture.</p>
+            <p>
+                <a href="https://github.com/yourusername/smart-logistic">GitHub</a> •
+                <a href="https://github.com/yourusername/smart-logistic/issues">Issues</a> •
+                <a href="https://github.com/yourusername/smart-logistic/blob/main/LICENSE">MIT License</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

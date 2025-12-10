@@ -3,65 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LogiRoute - Logistics Management</title>
+    <title>Smart Logistic</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>🚚 LogiRoute</h1>
-            <p>Logistics Optimization System</p>
+            <h1>📦 Smart Logistic</h1>
         </div>
     </header>
 
     <main class="container">
-        <!-- Vehicles Section -->
+        <!-- Vehicles -->
         <section class="card">
-            <h2>📦 Vehicles</h2>
-            <div id="vehicles-list" class="grid"></div>
+            <h2>Vehicles</h2>
+            <div id="vehicles-list" class="list"></div>
         </section>
 
-        <!-- Packages Section -->
+        <!-- Packages -->
         <section class="card">
-            <h2>📮 Packages</h2>
-            <div id="packages-list" class="grid"></div>
+            <h2>Packages</h2>
+            <div id="packages-list" class="list"></div>
         </section>
 
-        <!-- Assign Packages Section -->
+        <!-- Assign Form -->
         <section class="card">
-            <h2>🎯 Assign Packages to Vehicle</h2>
+            <h2>Assign Packages</h2>
             <form id="assign-form">
-                <div class="form-group">
-                    <label for="vehicle-select">Select Vehicle:</label>
-                    <select id="vehicle-select" required>
-                        <option value="">-- Choose a vehicle --</option>
-                    </select>
-                </div>
+                <select id="vehicle-select" required>
+                    <option value="">Select Vehicle</option>
+                </select>
 
-                <div class="form-group">
-                    <label>Select Packages:</label>
-                    <div id="package-checkboxes"></div>
-                </div>
+                <div id="package-checkboxes"></div>
 
-                <button type="submit" class="btn btn-primary">Assign Packages</button>
+                <button type="submit" class="btn">Assign</button>
             </form>
         </section>
 
-        <!-- Delivery Routes Section -->
+        <!-- Routes -->
         <section class="card">
-            <h2>🗺️ Active Delivery Routes</h2>
+            <h2>Active Routes</h2>
             <div id="routes-list"></div>
         </section>
-
-        <!-- Status Message -->
-        <div id="status-message" class="status-message"></div>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 LogiRoute. Built with Spring Boot 3 & Clean Architecture.</p>
-        </div>
-    </footer>
+    <!-- Status Toast -->
+    <div id="toast" class="toast"></div>
 
     <script src="/js/app.js"></script>
 </body>

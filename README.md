@@ -1,4 +1,4 @@
-# 🚚 LogiRoute - Logistics Optimization System
+# 📦 Smart Logistic - Logistics Management System
 
 <div align="center">
 
@@ -9,11 +9,10 @@
 
 **Enterprise-grade logistics management system with intelligent package routing, capacity optimization, and state machine validation.**
 
+[Live Demo](https://yourusername.github.io/smart-logistic/) •
 [Features](#-features) •
-[Demo](#-demo) •
 [Quick Start](#-quick-start) •
-[Architecture](#-architecture) •
-[API Documentation](#-api-documentation) •
+[API Docs](#-api-documentation) •
 [Contributing](#-contributing)
 
 </div>
@@ -39,7 +38,7 @@
 
 ## 🎯 Overview
 
-**LogiRoute** is a production-ready logistics optimization system built with **Spring Boot 3** and **Clean Architecture** principles. It demonstrates enterprise software development best practices including:
+**Smart Logistic** is a production-ready logistics management system built with **Spring Boot 3** and **Clean Architecture** principles. It demonstrates enterprise software development best practices including:
 
 - ✅ **Domain-Driven Design (DDD)** - Rich domain models with business logic
 - ✅ **Clean Architecture** - Layered design with clear separation of concerns

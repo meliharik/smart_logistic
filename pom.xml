@@ -13,10 +13,10 @@
     </parent>
 
     <groupId>com.logistics</groupId>
-    <artifactId>logiroute</artifactId>
+    <artifactId>smart-logistic</artifactId>
     <version>1.0.0</version>
-    <name>LogiRoute</name>
-    <description>Logistics Optimization System</description>
+    <name>Smart Logistic</name>
+    <description>Smart Logistics Management System</description>
 
     <properties>
         <java.version>17</java.version>
